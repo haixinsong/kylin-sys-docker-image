@@ -1,0 +1,19 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: TARGETARCH=amd64 TARGETVARIANT=x86_64  SP_VERSION=1 && docker buildx build --progress=plain --no-cache . -f kylin_v10.sys.Dockerfile --platform=linux/$TARGETARCH -t kylin:v10-sp$SP_VERSION-$TARGETARCH --build-arg TARGETARCH=$TARGETARCH --build-arg TARGETVARIANT=$TARGETVARIANT --build-arg SP_VERSION=$SP_VERSION 2>&1 | tee kylin:v10-sp$SP_VERSION-$TARGETARCH-build.log;
+
