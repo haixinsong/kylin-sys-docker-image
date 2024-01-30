@@ -18,9 +18,6 @@ RUN yum --installroot=/target \
     --releasever=10 \
     --setopt=tsflags=nodocs \
     install -y kylin-release coreutils rpm yum bash procps tar
-RUN yum clean all --installroot /target && \
-    rm -rf /target/var/cache/yum && \
-    rm -rf /target/var/log/*
 
 FROM --platform=linux/${TARGETARCH} scratch as runner
 COPY --from=bootstrap /target /
