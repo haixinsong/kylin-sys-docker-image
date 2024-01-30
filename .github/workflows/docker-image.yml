@@ -1,19 +1,32 @@
-name: Docker Image CI
+name: Publish Docker image
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  TEST_TAG: user/app:test
 
 jobs:
-
-  build:
-
+  push_to_registry:
+    name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: TARGETARCH=amd64 TARGETVARIANT=x86_64  SP_VERSION=1 && docker buildx build --progress=plain --no-cache . -f kylin_v10.sys.Dockerfile --platform=linux/$TARGETARCH -t kylin:v10-sp$SP_VERSION-$TARGETARCH --build-arg TARGETARCH=$TARGETARCH --build-arg TARGETVARIANT=$TARGETVARIANT --build-arg SP_VERSION=$SP_VERSION 2>&1 | tee kylin:v10-sp$SP_VERSION-$TARGETARCH-build.log;
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          platforms: linux/amd64,linux/arm64
+          context: .
+          build-args: |
+            SP_VERSION=1
+          file: ./kylin_v10.sys.Dockerfile
+          push: true
+          tags: hxsoong/kylin:v10-sp1
