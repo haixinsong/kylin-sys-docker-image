@@ -11,12 +11,6 @@ jobs:
     strategy:
       matrix:
         SP_VERSION: [1, 2, 3]
-        TARGETARCH: [amd64, arm64]
-        include:
-          - TARGETARCH: amd64
-            TARGETVARIANT: x86_64
-          - TARGETARCH: arm64
-            TARGETVARIANT: aarch64
 
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
@@ -37,12 +31,10 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          platforms: linux/${{ matrix.TARGETARCH }}
+          platforms: linux/amd64,linux/arm64
           context: .
           build-args: |
             SP_VERSION=${{ matrix.SP_VERSION }}
-            TARGETARCH=${{ matrix.TARGETARCH }}
-            TARGETVARIANT=${{ matrix.TARGETVARIANT }}
           file: ./kylin_v10.sys.Dockerfile
           push: true
           tags: hxsoong/kylin:v10-sp${{ matrix.SP_VERSION }}
