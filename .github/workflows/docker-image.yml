@@ -8,6 +8,16 @@ env:
 
 jobs:
   push_to_registry:
+    strategy:
+      matrix:
+        SP_VERSION: [1, 2, 3]
+        TARGETARCH: [amd64, arm64]
+        include:
+          - TARGETARCH: amd64
+            TARGETVARIANT: x86_64
+          - TARGETARCH: arm64
+            TARGETVARIANT: aarch64
+
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
     steps:
@@ -27,10 +37,12 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/${{ matrix.TARGETARCH }}
           context: .
           build-args: |
-            SP_VERSION=1
+            SP_VERSION=${{ matrix.SP_VERSION }}
+            TARGETARCH=${{ matrix.TARGETARCH }}
+            TARGETVARIANT=${{ matrix.TARGETVARIANT }}
           file: ./kylin_v10.sys.Dockerfile
           push: true
-          tags: hxsoong/kylin:v10-sp1
+          tags: hxsoong/kylin:v10-sp${{ matrix.SP_VERSION }}
